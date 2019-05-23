@@ -1,16 +1,16 @@
-# megalo-router
-配合网易小程序框架megalo使用的router,尽量保持与vue-router一致的开发体验，减少技术成本，方便项目从web迁移到小程序
+# vue-router-uni
+配合dcloud框架uni使用的Router,尽量保持与vue-router一致的开发体验，减少技术成本，方便项目从web迁移到uni
 
-微信小程序、百度小程序、支付宝小程序通用语法，无需做适配
+修改自 https://github.com/NextBoy/megalo-router, 只是简单改成uni,platform 无法判断
 
-优化megalo的分包页面的跳转写法
+优化uni的分包页面的跳转写法
 
-megalo默认的分包页面之间的跳转比较麻烦，需要写相对路径，例如
+uni默认的分包页面之间的跳转比较麻烦，需要写相对路径，例如
 例如从 home/index 跳转的到 packgeA/pages/a/index，相对路径为 ../../packgeA/pages/a/index。
 
-使用megaloRouter则没有这种烦恼，直接
+使用vue-Router-uni则没有这种烦恼，直接
 ```js
-    $router.push('/packgeA/pages/a/index')
+    $Router.push('/packgeA/pages/a/index')
 ```
 
 ## 版本记录
@@ -24,9 +24,9 @@ megalo默认的分包页面之间的跳转比较麻烦，需要写相对路径�
     
 - 1.0.3
 
-    feat: 增加$router.ready方法          
-    feat: 增加router模式配置          
-    feat: 增加$router.app 获取全局对象   
+    feat: 增加$Router.ready方法          
+    feat: 增加Router模式配置          
+    feat: 增加$Router.app 获取全局对象   
 
 - 1.0.4
 
@@ -35,16 +35,16 @@ megalo默认的分包页面之间的跳转比较麻烦，需要写相对路径�
 ## 安装
 
 ``` bash
-npm i megalo-router --save
+npm i vue-router-uni --save
 ```
 
 ## 使用
 
 ``` js
 // app.js or main.js
-import megaloRouter  from 'megalo-router'
+import Router  from 'vue-router-uni'
 
-Vue.use(megaloRouter, {
+Vue.use(Router, {
     mode: 'strict' // strict or loose 可配置项，不配置的话默认为strict
     tabBars: [ // 必须配置项
         '/pages/hello',
@@ -69,31 +69,31 @@ Vue.use的option接受一个mode变量, 表示路由的模式，有两种模式�
 
 #### 属性
 
-* $router.app
+* $Router.app
 
 获取全局的app,相当于getApp()
 
-注意：在App.vue中使用的话需要结合$router.ready(()；在普通的page页面使用则无限制
+注意：在App.vue中使用的话需要结合$Router.ready(()；在普通的page页面使用则无限制
 
 在普通页面使用
 ```page.vue
 
-mounted () {
-    console.log(this.$router.app)
+onReady () {
+    console.log(this.$Router.app)
 }
 ```
 在App.vue使用
 
 ```App.vue
     onLaunch () {
-        this.$router.ready(() => { 
-            console.log(this.$router.app) // 成功 
+        this.$Router.ready(() => { 
+            console.log(this.$Router.app) // 成功 
         })
     }
 
 ```
 
-* $router.currentRoute & $route
+* $Router.currentRoute & $Route
 
 包含如下信息：
 ```js
@@ -103,24 +103,24 @@ mounted () {
     fullPath: '' // 完整路径，带参数
 }
 ```
-在page页面内通过$route获取参数(在APP.vue里面使用$route的话需要结合$router.ready)
+在page页面内通过$Route获取参数(在APP.vue里面使用$Route的话需要结合$Router.ready)
 
 在普通页面使用
 ```page.vue
 
-mounted () {
-    console.log(this.$route.query)
-    console.log(this.$route.path)
-    console.log(this.$route.fullPath)
+onReady () {
+    console.log(this.$Route.query)
+    console.log(this.$Route.path)
+    console.log(this.$Route.fullPath)
 }
 ```
 在App.vue使用
 
 ```App.vue
     onLaunch () {
-        this.$router.ready(() => {
-            console.log(this.$route) // 成功 
-            console.log(this.$router.currentRoute) // 成功 
+        this.$Router.ready(() => {
+            console.log(this.$Route) // 成功 
+            console.log(this.$Router.currentRoute) // 成功 
         })
     }
 
@@ -128,74 +128,74 @@ mounted () {
 
 #### 方法
 
-* $router.ready()
+* $Router.ready()
 
 接收一个回调函数作为参数
 
-在App.vue中获取$router.app、$route对象 或者 $router.currentRoute，需要调用$router.ready
+在App.vue中获取$Router.app、$Route对象 或者 $Router.currentRoute，需要调用$Router.ready
 
 ```App.vue
     onLaunch () {
-        this.$router.ready(() => {
-            console.log(this.$router.app) // 成功
-            console.log(this.$route) // 成功
+        this.$Router.ready(() => {
+            console.log(this.$Router.app) // 成功
+            console.log(this.$Route) // 成功
         
         })
     }
 
 ```
-如果在App.vue中不使用ready方法直接获取 $router.app或者$route的话会导致失败，因为此时router并未初始化完成
+如果在App.vue中不使用ready方法直接获取 $Router.app或者$Route的话会导致失败，因为此时Router并未初始化完成
 
-* $router.push()
+* $Router.push()
 
 打开一个新页面，如果是打开tabBar页面，实际是使用switchTab, 否则使用navigateTo
 
 **如果是跳转到tabBar页面，是无法进行传参的，如果真的要传参到tabBar页面，请使用reLaunch 或者路由模式配置为宽松模式（loose）**
 ```js
     // 使用参数和路径进行跳转
-    $router.push({query: {id: 1}, path: '/pages/hello/index'})
+    $Router.push({query: {id: 1}, path: '/pages/hello/index'})
     // 或者直接传递一个路径
-    $router.push('/pages/hello/index?id=1')
+    $Router.push('/pages/hello/index?id=1')
 ```
-* $router.replace()
+* $Router.replace()
 
 在当前页面打开新页面进行替换，如果是打开tabBar页面，实际是使用switchTab, 否则使用redirectTo
 
 **如果是跳转到tabBar页面，是无法进行传参的，如果真的要传参到tabBar页面，请使用reLaunch 或者路由模式配置为宽松模式（loose）**
 ```js
     // 使用参数和路径进行跳转
-    $router.replace({query: {id: 1}, path: '/pages/hello/index'})
+    $Router.replace({query: {id: 1}, path: '/pages/hello/index'})
     // 或者直接传递一个路径
-    $router.replace('/pages/hello/index?id=1')
+    $Router.replace('/pages/hello/index?id=1')
 ```
-* $router.go()
+* $Router.go()
 
 回退页面
 ```js
-    $router.go(-1) // 后退一页
-    $router.go(0) // 重新载入当前页面 相当于reLaunch当前页面
+    $Router.go(-1) // 后退一页
+    $Router.go(0) // 重新载入当前页面 相当于reLaunch当前页面
 ```
-* $router.back()
+* $Router.back()
 
-回到上一页，同$router.go(-1)
+回到上一页，同$Router.go(-1)
 
-* $router.reLaunch()
+* $Router.reLaunch()
 
 重新载入小程序
 ```js
     // 使用参数和路径进行跳转
-    $router.reLaunch({query: {id: 1}, path: '/pages/hello/index'})
+    $Router.reLaunch({query: {id: 1}, path: '/pages/hello/index'})
     // 或者直接传递一个路径
-    $router.reLaunch('/pages/hello/index?id=1')
+    $Router.reLaunch('/pages/hello/index?id=1')
 ```
-* $router.getPlatform()
+* $Router.getPlatform()
 
 获取当前所在平台对象，返回值为一个Promise
 
 使用方法
 ```page.vue
-async mounted () {
-    const platform = await this.$router.getPlatform()
+async onReady () {
+    const platform = await this.$Router.getPlatform()
     console.log(platform)
     // 微信小程序里面得到的是wx对象
     // 百度小程序里面得到的是swan对象
@@ -203,14 +203,14 @@ async mounted () {
 }
 ```
 
-* $router.platform.ready()
+* $Router.platform.ready()
 
 接收一个回调，回调的参数为当前所在平台对象，作用跟getPlatform一样，是基于getPlatform的封装
 
 使用方法
 ```page.vue
 async mounted () {
-    this.$router.platform.ready(platform => {
+    this.$Router.platform.ready(platform => {
         console.log(platform)
         // 微信小程序里面得到的是wx对象
         // 百度小程序里面得到的是swan对象
@@ -234,7 +234,7 @@ async mounted () {
 
     如果需要对跳转的成功或者失败进行回调处理，可以在跳转时候传入回调
     ```js
-    $router.replace({
+    $Router.replace({
       query: {id: 1},
       path: '/pages/hello/index',
       success: (res) => {console.log('跳转成功', res)},  

@@ -1,7 +1,5 @@
-import { joinQuery, parseUrl, deepClone, getMegaloRoutePath, getCurrentRoute } from './utils'
-declare let wx: any
-declare let my: any
-declare let swan: any
+import { joinQuery, parseUrl, deepClone, getUniRoutePath, getCurrentRoute } from './utils'
+declare let uni: any
 declare let getApp: Function
 
 interface Route {
@@ -24,7 +22,7 @@ interface Platform {
     [key: string]: any
 }
 
-class MegaloRouter {
+class Router {
     currentRoute: Route
     protected _platform: Platform
     protected mode: string = 'strict'
@@ -106,7 +104,7 @@ class MegaloRouter {
             // 如果有参数，拼接参数
             let url:string = Object.keys(query).length ? joinQuery(path, query) : path
             // 转换为符合megalo要求的相对路径
-            url = await getMegaloRoutePath(url)
+            url = await getUniRoutePath(url)
             const platform: Platform = await this.getPlatform()
             platform[action]({
                 url,
@@ -136,74 +134,53 @@ class MegaloRouter {
         const router = this
         router.tabBars = options.tabBars || []
         router.mode = options.mode || 'strict'
-        Object.defineProperty(Vue.prototype, '$router', {
+        
+        Object.defineProperty(Vue.prototype, '$Router', {
             get () {
                 return router
             },
             set () {
-                throw new Error('不能修改$router的值')
+                throw new Error('不能修改$Router的值')
             }
         })
-        Object.defineProperty(Vue.prototype, '$route', {
+        Object.defineProperty(Vue.prototype, '$Route', {
             get () {
                 return router.currentRoute
             },
             set () {
-                throw new Error('不能修改$route的值')
+                throw new Error('不能修改$Route的值')
             }
         })
         Vue.mixin({
             onLaunch () {
-                let platformType = this.$mp ? this.$mp.platform : undefined
-                switch (platformType) {
-                    case 'wechat':
-                        router._platform = wx as Platform
-                        break
-                    case 'alipay':
-                        router._platform = my as Platform
-                        break
-                    case 'swan':
-                        router._platform = swan as Platform
-                        break
-                    default:
-                        router._platform = wx as Platform
-                        console.warn('megalo-router无法识别小程序平台, 默认为wx')
-                }
-                console.warn(`megalo-router识别小程序平台成功，当前小程序平台, ${platformType}`)
+                // let platformType = this.$mp ? this.$mp.platform : undefined
+                let platformType = uni ? uni.getSystemInfoSync().platform : undefined
+
+                // console.warn(`uni-router识别平台成功，当前平台, ${appType} : ${platformType}`)
+                console.warn(`uni-router识别平台成功，当前平台,  ${platformType}`)
             },
-            beforeCreate () {
+            onLoad () {
                 if (this.$mp && this.$mp.page && this.$mp.page.route) {
                     const path = '/' + this.$mp.page.route
                     router.currentRoute = {
-                        query: this.$mp.options,
+                        query: this.$mp.query,
                         path,
-                        fullPath: joinQuery(path, this.$mp.options)
+                        fullPath: joinQuery(path, this.$mp.query)
                     }
                 }
                 if (router._platform) return
-                let platformType = this.$mp ? this.$mp.platform : undefined
-                switch (platformType) {
-                    case 'wechat':
-                        router._platform = wx as Platform
-                        break
-                    case 'alipay':
-                        router._platform = my as Platform
-                        break
-                    case 'swan':
-                        router._platform = swan as Platform
-                        break
-                    default:
-                        console.warn('megalo-router正在尝试识别小程序平台')
-                }
+                // let platformType = this.$mp ? this.$mp.platform : undefined
+                router._platform = uni as Platform
+                
             },
             // onShow 里面还需要重新赋值一次，用于页面回退的时候纠正
             onShow () {
-                if (this.$mp.page && this.$mp.page.route) {
+                if (this.$mp && this.$mp.page && this.$mp.page.route) {
                     const path = '/' + this.$mp.page.route
                     router.currentRoute = {
-                        query: this.$mp.options,
+                        query: this.$mp.query,
                         path,
-                        fullPath: joinQuery(path, this.$mp.options)
+                        fullPath: joinQuery(path, this.$mp.query)
                     }
                 }
             }
@@ -211,4 +188,4 @@ class MegaloRouter {
     }
 }
 
-export default new MegaloRouter()
+export default new Router()

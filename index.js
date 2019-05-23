@@ -36,11 +36,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 define(["require", "exports", "./utils"], function (require, exports, utils_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var MegaloRouter = (function () {
-        function MegaloRouter() {
+    var Router = (function () {
+        function Router() {
             this.mode = 'strict';
         }
-        Object.defineProperty(MegaloRouter.prototype, "platform", {
+        Object.defineProperty(Router.prototype, "platform", {
             get: function () {
                 var that = this;
                 return {
@@ -53,14 +53,14 @@ define(["require", "exports", "./utils"], function (require, exports, utils_1) {
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(MegaloRouter.prototype, "app", {
+        Object.defineProperty(Router.prototype, "app", {
             get: function () {
                 return getApp();
             },
             enumerable: true,
             configurable: true
         });
-        MegaloRouter.prototype.ready = function (callback) {
+        Router.prototype.ready = function (callback) {
             var _this = this;
             var ready = function () { return _this.currentRoute && _this.currentRoute.path && getApp() && _this._platform; };
             if (ready()) {
@@ -75,7 +75,7 @@ define(["require", "exports", "./utils"], function (require, exports, utils_1) {
                 }, 10);
             }
         };
-        MegaloRouter.prototype.tabAction = function (to) {
+        Router.prototype.tabAction = function (to) {
             if (this.mode === 'strict')
                 return 'switchTab';
             to.query = to.query || {};
@@ -85,21 +85,21 @@ define(["require", "exports", "./utils"], function (require, exports, utils_1) {
             }
             return 'switchTab';
         };
-        MegaloRouter.prototype.push = function (to) {
+        Router.prototype.push = function (to) {
             if (to === void 0) { to = {}; }
             to = typeof to === 'string' ? { path: to } : to;
             var path = utils_1.parseUrl(to.path || '').path;
             var action = this.tabBars.includes(path) ? this.tabAction(to) : 'navigateTo';
             this.navigate(action, to);
         };
-        MegaloRouter.prototype.replace = function (to) {
+        Router.prototype.replace = function (to) {
             if (to === void 0) { to = {}; }
             to = typeof to === 'string' ? { path: to } : to;
             var path = utils_1.parseUrl(to.path || '').path;
             var action = this.tabBars.includes(path) ? this.tabAction(to) : 'redirectTo';
             this.navigate(action, to);
         };
-        MegaloRouter.prototype.go = function (delta) {
+        Router.prototype.go = function (delta) {
             return __awaiter(this, void 0, void 0, function () {
                 var platform;
                 return __generator(this, function (_a) {
@@ -118,15 +118,15 @@ define(["require", "exports", "./utils"], function (require, exports, utils_1) {
                 });
             });
         };
-        MegaloRouter.prototype.back = function () {
+        Router.prototype.back = function () {
             this.go(-1);
         };
-        MegaloRouter.prototype.reLaunch = function (to) {
+        Router.prototype.reLaunch = function (to) {
             if (to === void 0) { to = {}; }
             to = typeof to === 'string' ? { path: to } : to;
             this.navigate('reLaunch', to);
         };
-        MegaloRouter.prototype.navigate = function (action, to) {
+        Router.prototype.navigate = function (action, to) {
             if (action === void 0) { action = 'navigateTo'; }
             if (to === void 0) { to = {}; }
             return __awaiter(this, void 0, void 0, function () {
@@ -142,7 +142,7 @@ define(["require", "exports", "./utils"], function (require, exports, utils_1) {
                                 throw new Error(err);
                             } : _c, _d = to.complete, complete = _d === void 0 ? function () { } : _d;
                             url = Object.keys(query).length ? utils_1.joinQuery(path, query) : path;
-                            return [4, utils_1.getMegaloRoutePath(url)];
+                            return [4, utils_1.getUniRoutePath(url)];
                         case 1:
                             url = _e.sent();
                             return [4, this.getPlatform()];
@@ -163,7 +163,7 @@ define(["require", "exports", "./utils"], function (require, exports, utils_1) {
                 });
             });
         };
-        MegaloRouter.prototype.getPlatform = function () {
+        Router.prototype.getPlatform = function () {
             var _this = this;
             return new Promise(function (resolve) {
                 if (_this._platform) {
@@ -179,84 +179,57 @@ define(["require", "exports", "./utils"], function (require, exports, utils_1) {
                 }
             });
         };
-        MegaloRouter.prototype.install = function (Vue, options) {
+        Router.prototype.install = function (Vue, options) {
             var router = this;
             router.tabBars = options.tabBars || [];
             router.mode = options.mode || 'strict';
-            Object.defineProperty(Vue.prototype, '$router', {
+            Object.defineProperty(Vue.prototype, '$Router', {
                 get: function () {
                     return router;
                 },
                 set: function () {
-                    throw new Error('不能修改$router的值');
+                    throw new Error('不能修改$Router的值');
                 }
             });
-            Object.defineProperty(Vue.prototype, '$route', {
+            Object.defineProperty(Vue.prototype, '$Route', {
                 get: function () {
                     return router.currentRoute;
                 },
                 set: function () {
-                    throw new Error('不能修改$route的值');
+                    throw new Error('不能修改$Route的值');
                 }
             });
             Vue.mixin({
                 onLaunch: function () {
-                    var platformType = this.$mp ? this.$mp.platform : undefined;
-                    switch (platformType) {
-                        case 'wechat':
-                            router._platform = wx;
-                            break;
-                        case 'alipay':
-                            router._platform = my;
-                            break;
-                        case 'swan':
-                            router._platform = swan;
-                            break;
-                        default:
-                            router._platform = wx;
-                            console.warn('megalo-router无法识别小程序平台, 默认为wx');
-                    }
-                    console.warn("megalo-router\u8BC6\u522B\u5C0F\u7A0B\u5E8F\u5E73\u53F0\u6210\u529F\uFF0C\u5F53\u524D\u5C0F\u7A0B\u5E8F\u5E73\u53F0, " + platformType);
+                    var platformType = uni ? uni.getSystemInfoSync().platform : undefined;
+                    console.warn("uni-router\u8BC6\u522B\u5E73\u53F0\u6210\u529F\uFF0C\u5F53\u524D\u5E73\u53F0,  " + platformType);
                 },
-                beforeCreate: function () {
+                onLoad: function () {
                     if (this.$mp && this.$mp.page && this.$mp.page.route) {
                         var path = '/' + this.$mp.page.route;
                         router.currentRoute = {
-                            query: this.$mp.options,
+                            query: this.$mp.query,
                             path: path,
-                            fullPath: utils_1.joinQuery(path, this.$mp.options)
+                            fullPath: utils_1.joinQuery(path, this.$mp.query)
                         };
                     }
                     if (router._platform)
                         return;
-                    var platformType = this.$mp ? this.$mp.platform : undefined;
-                    switch (platformType) {
-                        case 'wechat':
-                            router._platform = wx;
-                            break;
-                        case 'alipay':
-                            router._platform = my;
-                            break;
-                        case 'swan':
-                            router._platform = swan;
-                            break;
-                        default:
-                            console.warn('megalo-router正在尝试识别小程序平台');
-                    }
+                    router._platform = uni;
                 },
                 onShow: function () {
-                    if (this.$mp.page && this.$mp.page.route) {
+                    if (this.$mp && this.$mp.page && this.$mp.page.route) {
                         var path = '/' + this.$mp.page.route;
                         router.currentRoute = {
-                            query: this.$mp.options,
+                            query: this.$mp.query,
                             path: path,
-                            fullPath: utils_1.joinQuery(path, this.$mp.options)
+                            fullPath: utils_1.joinQuery(path, this.$mp.query)
                         };
                     }
                 }
             });
         };
-        return MegaloRouter;
+        return Router;
     }());
-    exports.default = new MegaloRouter();
+    exports.default = new Router();
 });

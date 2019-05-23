@@ -86,11 +86,11 @@ export const getCurrentRoute = async (): Promise<string> => {
     })
 }
 /**
- * @description 转换路由路径为符合megalo的路径
+ * @description 转换路由路径为符合Uni的路径
  * @param pathB {string}
  * @return url {string}
  */
-export const getMegaloRoutePath = async (pathB: string): Promise<string> => {
+export const getUniRoutePath = async (pathB: string): Promise<string> => {
     const pathA: string = await getCurrentRoute()
     const toTop: string = pathA.split('/').reduce((res, val, index, arr) => {
         if (index === arr.length - 1 || !val) return res

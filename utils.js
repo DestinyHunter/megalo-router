@@ -110,7 +110,7 @@ define(["require", "exports"], function (require, exports) {
                 })];
         });
     }); };
-    exports.getMegaloRoutePath = function (pathB) { return __awaiter(_this, void 0, void 0, function () {
+    exports.getUniRoutePath = function (pathB) { return __awaiter(_this, void 0, void 0, function () {
         var pathA, toTop;
         return __generator(this, function (_a) {
             switch (_a.label) {
